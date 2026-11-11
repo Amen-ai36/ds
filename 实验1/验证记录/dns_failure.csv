@@ -1,0 +1,2 @@
+request,server,status,reason,t1_unix_ms,t2_unix_ms,t3_unix_ms,t4_unix_ms,local_unix_ms,corrected_unix_ms,offset_ms,delay_ms,wait_ms,resolve_ms,sent,discarded_packets,origin_mismatch_packets,last_discard_reason,request_timestamp_hex,transport
+"1","[invalid]","NTP_ServerAddressNotSet","DNS_FAILED: java.net.UnknownHostException: [invalid]: invalid IPv6 address literal","","","","","","","","","0","1","false","0","0","","","DIRECT_UDP"

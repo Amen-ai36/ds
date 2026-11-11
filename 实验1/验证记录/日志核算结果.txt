@@ -1,0 +1,5 @@
+PASS /Users/veritas/Documents/ds实验/实验1/验证记录/local_regression_rows.csv: 4 rows; formulas and failure fields verified
+PASS /Users/veritas/Documents/ds实验/实验1/验证记录/dns_failure.csv: 1 rows; formulas and failure fields verified
+PASS /Users/veritas/Documents/ds实验/实验1/验证记录/console_local.csv: 2 rows; formulas and failure fields verified
+PASS /Users/veritas/Documents/ds实验/实验1/验证记录/ntp_matched.csv: 1 rows; formulas and failure fields verified
+PASS /Users/veritas/Documents/ds实验/实验1/验证记录/ntp_direct_ip.csv: 3 rows; formulas and failure fields verified

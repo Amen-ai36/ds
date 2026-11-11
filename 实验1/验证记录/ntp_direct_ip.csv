@@ -1,0 +1,4 @@
+request,server,status,reason,t1_unix_ms,t2_unix_ms,t3_unix_ms,t4_unix_ms,local_unix_ms,corrected_unix_ms,offset_ms,delay_ms,wait_ms,resolve_ms,sent,discarded_packets,origin_mismatch_packets,last_discard_reason,request_timestamp_hex
+"1","129.6.15.25","NTP_ReceiveFailed","TIMEOUT","1794389459972","","","","","","","","1001","0","true","0","0","","ee9eb453f8d4fdf3"
+"2","129.6.15.25","NTP_ReceiveFailed","TIMEOUT","1794389465980","","","","","","","","1001","0","true","0","0","","ee9eb459fae147ae"
+"3","129.6.15.25","NTP_ReceiveFailed","TIMEOUT","1794389471988","","","","","","","","1001","0","true","0","0","","ee9eb45ffced9168"

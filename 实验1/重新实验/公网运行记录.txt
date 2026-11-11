@@ -1,0 +1,5 @@
+NTP server: 203.107.6.88:123; timeout=2000 ms; socket=true
+Request 1: NTP_ReceiveFailed reason=TIMEOUT wait=2001 ms discarded=0 ()
+Request 2: NTP_ReceiveFailed reason=TIMEOUT wait=2000 ms discarded=0 ()
+Request 3: NTP_ReceiveFailed reason=TIMEOUT wait=2001 ms discarded=0 ()
+Attempts=3 Sent=3 Success=0 CSV=实验1/重新实验/公网NTP新数据.csv

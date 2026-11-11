@@ -1,0 +1,7 @@
+本地模拟服务器记录，不是公网精度测量。
+NTP server: 127.0.0.1:55886; timeout=200 ms; socket=true
+Request 1: NTP_Success reason=OK wait=0 ms discarded=0 ()
+  T1=1794390046581 T2=1794390046582 T3=1794390046582 T4=1794390046582
+  offset=0 ms delay=1 ms local=1794390046582 corrected=1794390046582 (UTC 09:40:46)
+Request 2: NTP_ReceiveFailed reason=TIMEOUT wait=201 ms discarded=0 ()
+Attempts=2 Sent=2 Success=1 CSV=/Users/veritas/Documents/ds实验/实验1/验证记录/console_local.csv

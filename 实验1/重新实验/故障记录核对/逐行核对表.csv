@@ -1,0 +1,5 @@
+source_line,request,status,recomputed_offset_ms,recomputed_delay_ms,recomputed_corrected_unix_ms,check,detail
+2,1,NTP_ReceiveFailed,,,,PASS,TIMEOUT
+3,2,NTP_Success,100,0,1794390046200,PASS,
+4,3,NTP_SendFailed,,,,PASS,SEND_FAILED: java.io.IOException: 
+5,4,NTP_ServerAddressNotSet,,,,PASS,DNS_FAILED: java.net.UnknownHostException: [invalid]: invalid IPv6 address literal

@@ -1,0 +1,6 @@
+PASS delayed response: previous request timed out; old packet + short packet + unsynchronized packet rejected; current response accepted
+RECOMPUTE T1=1794389364134 T2=1794389364235 T3=1794389364235 T4=1794389364135 offset=100 delay=1 corrected=1794389364235
+PASS closed socket: SEND_FAILED with specific exception and elapsed time
+PASS DNS failure: previous server cleared; specific reason recorded
+PASS total timeout: 150 ms; discarded=8; invalid packet stream does not reset deadline
+ALL REGRESSION TESTS PASSED

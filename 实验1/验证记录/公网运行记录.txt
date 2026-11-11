@@ -1,0 +1,3 @@
+NTP server: time.nist.gov:123; timeout=1000 ms; socket=true
+Request 1: NTP_ServerAddressNotSet reason=DNS_FAILED: java.net.UnknownHostException: time.nist.gov: nodename nor servname provided, or not known wait=0 ms discarded=0 ()
+Attempts=1 Sent=0 Success=0 CSV=实验1/验证记录/ntp_matched.csv

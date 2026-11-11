@@ -1,0 +1,32 @@
+NTP server: 203.107.6.88:123; timeout=2000 ms; socket=true
+Request 1: NTP_Success reason=OK wait=47 ms discarded=0 ()
+  T1=1794390014991 T2=1794390015289 T3=1794390015311 T4=1794390015038
+  offset=285 ms delay=25 ms local=1794390015038 corrected=1794390015323 (UTC 09:40:15)
+Request 2: NTP_Success reason=OK wait=19 ms discarded=0 ()
+  T1=1794390020044 T2=1794390020338 T3=1794390020338 T4=1794390020064
+  offset=284 ms delay=20 ms local=1794390020064 corrected=1794390020348 (UTC 09:40:20)
+Request 3: NTP_Success reason=OK wait=20 ms discarded=0 ()
+  T1=1794390025068 T2=1794390025363 T3=1794390025363 T4=1794390025090
+  offset=284 ms delay=22 ms local=1794390025090 corrected=1794390025374 (UTC 09:40:25)
+Request 4: NTP_Success reason=OK wait=19 ms discarded=0 ()
+  T1=1794390030096 T2=1794390030394 T3=1794390030394 T4=1794390030120
+  offset=286 ms delay=24 ms local=1794390030120 corrected=1794390030406 (UTC 09:40:30)
+Request 5: NTP_Success reason=OK wait=19 ms discarded=0 ()
+  T1=1794390035127 T2=1794390035421 T3=1794390035421 T4=1794390035147
+  offset=284 ms delay=20 ms local=1794390035147 corrected=1794390035431 (UTC 09:40:35)
+Request 6: NTP_Success reason=OK wait=22 ms discarded=0 ()
+  T1=1794390040154 T2=1794390040447 T3=1794390040447 T4=1794390040176
+  offset=282 ms delay=22 ms local=1794390040176 corrected=1794390040458 (UTC 09:40:40)
+Request 7: NTP_Success reason=OK wait=25 ms discarded=0 ()
+  T1=1794390045181 T2=1794390045475 T3=1794390045475 T4=1794390045208
+  offset=280 ms delay=27 ms local=1794390045208 corrected=1794390045488 (UTC 09:40:45)
+Request 8: NTP_Success reason=OK wait=19 ms discarded=0 ()
+  T1=1794390050215 T2=1794390050508 T3=1794390050508 T4=1794390050235
+  offset=283 ms delay=20 ms local=1794390050235 corrected=1794390050518 (UTC 09:40:50)
+Request 9: NTP_Success reason=OK wait=29 ms discarded=0 ()
+  T1=1794390055238 T2=1794390055541 T3=1794390055541 T4=1794390055268
+  offset=288 ms delay=30 ms local=1794390055268 corrected=1794390055556 (UTC 09:40:55)
+Request 10: NTP_Success reason=OK wait=23 ms discarded=0 ()
+  T1=1794390060275 T2=1794390060570 T3=1794390060570 T4=1794390060299
+  offset=283 ms delay=24 ms local=1794390060299 corrected=1794390060582 (UTC 09:41:00)
+Attempts=10 Sent=10 Success=10 CSV=实验1/重新实验/公网NTP代理新数据.csv
