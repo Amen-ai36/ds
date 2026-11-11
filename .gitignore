@@ -18,3 +18,7 @@ nbproject/private/
 
 # Temporary Office lock files
 ~$*
+
+# Python generated cache
+__pycache__/
+*.pyc
