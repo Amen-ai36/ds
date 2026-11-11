@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="TimeServiceClient_GUI_uses_library">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/TimeServiceClient_GUI_uses_library/dist/TimeServiceClient_GUI_uses_library.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

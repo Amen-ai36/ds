@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Java/NetBeans/IntelliJ build output
+**/build/
+**/dist/
+**/out/
+*.class
+*.jar
+*.suo
+*.user
+*.aps
+
+# IDE metadata
+.idea/workspace.xml
+.idea/**/workspace.xml
+nbproject/private/
+
+# Temporary Office lock files
+~$*

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/TimeServiceClient_GUI_uses_library/dist/lib/swing-layout-1.0.4.jar!/" />
+      <root url="jar://$PROJECT_DIR$/TimeServiceClient_GUI_uses_library/dist/lib/TimeServiceClient_Library.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
