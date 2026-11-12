@@ -1,0 +1,5 @@
+request,server,status,reason,t1_unix_ms,t2_unix_ms,t3_unix_ms,t4_unix_ms,local_unix_ms,corrected_unix_ms,offset_ms,delay_ms,wait_ms,resolve_ms,sent,discarded_packets,origin_mismatch_packets,last_discard_reason,request_timestamp_hex,transport
+"1","127.0.0.1","NTP_ReceiveFailed","TIMEOUT","1794410604951","","","","","","","","150","0","true","0","0","","ee9f06ecf374bc6a","DIRECT_UDP"
+"2","127.0.0.1","NTP_Success","OK","1794410605103","1794410605204","1794410605204","1794410605104","1794410605104","1794410605204","100","1","0","0","true","3","1","SERVER_UNSYNCHRONIZED_OR_KOD","ee9f06ed1a5e353f","DIRECT_UDP"
+"3","127.0.0.1","NTP_SendFailed","SEND_FAILED: java.io.IOException: ","1794410605132","","","","","","","","1","0","false","0","0","","ee9f06ed21cac083","DIRECT_UDP"
+"4","[invalid]","NTP_ServerAddressNotSet","DNS_FAILED: java.net.UnknownHostException: [invalid]: invalid IPv6 address literal","","","","","","","","","0","0","false","0","0","","","DIRECT_UDP"
