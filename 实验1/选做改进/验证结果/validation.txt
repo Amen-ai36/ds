@@ -1,0 +1,5 @@
+PASS Java 8 compilation: javac 24.0.2
+PASS Java filter replay; negative delay, expiry, and reset checks passed
+PASS packaged client UDP integration: 2 warmup replies and 3 filtered outputs
+PASS timeout: failed exchange does not produce a filtered time
+PASS controlled and historical public data replay completed
