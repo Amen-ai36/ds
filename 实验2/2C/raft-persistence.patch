@@ -1,0 +1,124 @@
+diff --git a/src/raft/raft.go b/src/raft/raft.go
+--- a/src/raft/raft.go
++++ b/src/raft/raft.go
+@@ -18,13 +18,14 @@
+ //
+
+ import (
+-	//	"bytes"
++	"bytes"
++	"log"
+ 	"math/rand"
+ 	"sync"
+ 	"sync/atomic"
+ 	"time"
+
+-	//	"6.5840/labgob"
++	"6.5840/labgob"
+ 	"6.5840/labrpc"
+ )
+
+@@ -50,6 +51,18 @@
+ 	SnapshotIndex int
+ }
+
++// LogEntry contains a command and the term in which the leader appended it.
++type LogEntry struct {
++	Term    int
++	Command interface{}
++}
++
++type persistentState struct {
++	CurrentTerm int
++	VotedFor    int
++	Log         []LogEntry
++}
++
+ // A Go object implementing a single Raft peer.
+ type Raft struct {
+ 	mu        sync.Mutex          // Lock to protect shared access to this peer's state
+@@ -58,7 +71,11 @@
+ 	me        int                 // this peer's index into peers[]
+ 	dead      int32               // set by Kill()
+
+-	// Your data here (2A, 2B, 2C).
++	currentTerm int
++	votedFor    int
++	log         []LogEntry
++
++	// Your data here (2A, 2B).
+ 	// Look at the paper's Figure 2 for a description of what
+ 	// state a Raft server must maintain.
+
+@@ -81,36 +98,37 @@
+ // second argument to persister.Save().
+ // after you've implemented snapshots, pass the current snapshot
+ // (or nil if there's not yet a snapshot).
++//
++// The caller must hold rf.mu.
+ func (rf *Raft) persist() {
+-	// Your code here (2C).
+-	// Example:
+-	// w := new(bytes.Buffer)
+-	// e := labgob.NewEncoder(w)
+-	// e.Encode(rf.xxx)
+-	// e.Encode(rf.yyy)
+-	// raftstate := w.Bytes()
+-	// rf.persister.Save(raftstate, nil)
+-}
+-
+-
+-// restore previously persisted state.
++	state := persistentState{
++		CurrentTerm: rf.currentTerm,
++		VotedFor:    rf.votedFor,
++		Log:         rf.log,
++	}
++
++	var buf bytes.Buffer
++	if err := labgob.NewEncoder(&buf).Encode(state); err != nil {
++		log.Panicf("raft %d: encode persistent state: %v", rf.me, err)
++	}
++	rf.persister.Save(buf.Bytes(), nil)
++}
++
++
++// restore previously persisted state before starting Raft goroutines.
+ func (rf *Raft) readPersist(data []byte) {
+-	if data == nil || len(data) < 1 { // bootstrap without any state?
++	if len(data) == 0 {
+ 		return
+ 	}
+-	// Your code here (2C).
+-	// Example:
+-	// r := bytes.NewBuffer(data)
+-	// d := labgob.NewDecoder(r)
+-	// var xxx
+-	// var yyy
+-	// if d.Decode(&xxx) != nil ||
+-	//    d.Decode(&yyy) != nil {
+-	//   error...
+-	// } else {
+-	//   rf.xxx = xxx
+-	//   rf.yyy = yyy
+-	// }
++
++	var state persistentState
++	if err := labgob.NewDecoder(bytes.NewReader(data)).Decode(&state); err != nil {
++		log.Panicf("raft %d: decode persistent state: %v", rf.me, err)
++	}
++
++	rf.currentTerm = state.CurrentTerm
++	rf.votedFor = state.VotedFor
++	rf.log = state.Log
+ }
+
+
+@@ -245,6 +263,7 @@
+ 	rf.peers = peers
+ 	rf.persister = persister
+ 	rf.me = me
++	rf.votedFor = -1
+
+ 	// Your initialization code here (2A, 2B, 2C).
+
