@@ -8,7 +8,7 @@ import (
 
 func electionOnlyPeer() *Raft {
 	c, _ := ElectionProfile("baseline")
-	rf := &Raft{votedFor: -1, role: follower, timing: c, rng: rand.New(rand.NewSource(1))}
+	rf := &Raft{persister: MakePersister(), votedFor: -1, role: follower, timing: c, rng: rand.New(rand.NewSource(1))}
 	rf.resetElectionLocked()
 	return rf
 }

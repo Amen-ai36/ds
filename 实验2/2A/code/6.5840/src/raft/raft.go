@@ -18,16 +18,26 @@ package raft
 //
 
 import (
-	"6.5840/labrpc"
+	"bytes"
+	"log"
 	"math/rand"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"6.5840/labgob"
+	"6.5840/labrpc"
 )
 
 type LogEntry struct {
 	Command interface{}
 	Term    int
+}
+
+type persistentState struct {
+	CurrentTerm int
+	VotedFor    int
+	Log         []LogEntry
 }
 
 // as each Raft peer becomes aware that successive log entries are
@@ -59,7 +69,7 @@ type Raft struct {
 	me        int                 // this peer's index into peers[]
 	dead      int32               // set by Kill()
 
-	// 2A：以下字段均由 mu 保护。持久化读写由成员 C 接入。
+	// 以下字段均由 mu 保护，任期、投票与日志属于持久状态。
 	currentTerm      int
 	votedFor         int
 	role             nodeRole
@@ -85,42 +95,36 @@ func (rf *Raft) GetState() (int, bool) {
 	return rf.currentTerm, rf.role == leader && !rf.killed()
 }
 
-// save Raft's persistent state to stable storage,
-// where it can later be retrieved after a crash and restart.
-// see paper's Figure 2 for a description of what should be persistent.
-// before you've implemented snapshots, you should pass nil as the
-// second argument to persister.Save().
-// after you've implemented snapshots, pass the current snapshot
-// (or nil if there's not yet a snapshot).
+// persist saves the current term, vote and log together. The caller holds rf.mu.
 func (rf *Raft) persist() {
-	// Your code here (2C).
-	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// raftstate := w.Bytes()
-	// rf.persister.Save(raftstate, nil)
+	state := persistentState{
+		CurrentTerm: rf.currentTerm,
+		VotedFor:    rf.votedFor,
+		Log:         rf.log,
+	}
+	var buf bytes.Buffer
+	if err := labgob.NewEncoder(&buf).Encode(state); err != nil {
+		log.Panicf("raft %d: encode persistent state: %v", rf.me, err)
+	}
+	rf.persister.Save(buf.Bytes(), nil)
 }
 
-// restore previously persisted state.
+// readPersist restores state before starting the Raft goroutines.
 func (rf *Raft) readPersist(data []byte) {
-	if data == nil || len(data) < 1 { // bootstrap without any state?
+	if len(data) == 0 {
 		return
 	}
-	// Your code here (2C).
-	// Example:
-	// r := bytes.NewBuffer(data)
-	// d := labgob.NewDecoder(r)
-	// var xxx
-	// var yyy
-	// if d.Decode(&xxx) != nil ||
-	//    d.Decode(&yyy) != nil {
-	//   error...
-	// } else {
-	//   rf.xxx = xxx
-	//   rf.yyy = yyy
-	// }
+
+	var state persistentState
+	if err := labgob.NewDecoder(bytes.NewReader(data)).Decode(&state); err != nil {
+		log.Panicf("raft %d: decode persistent state: %v", rf.me, err)
+	}
+	if len(state.Log) == 0 {
+		state.Log = []LogEntry{{Term: 0}}
+	}
+	rf.currentTerm = state.CurrentTerm
+	rf.votedFor = state.VotedFor
+	rf.log = state.Log
 }
 
 // the service says it has created a snapshot that has
@@ -152,23 +156,26 @@ type RequestVoteReply struct {
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	reply.Term = rf.currentTerm
+	reply.VoteGranted = false
+	if rf.killed() || args.Term < rf.currentTerm {
+		return
+	}
 	if len(rf.log) == 0 {
 		rf.log = []LogEntry{{Term: 0}}
 	}
-	reply.VoteGranted = false
 	if args.Term > rf.currentTerm {
 		rf.becomeFollowerLocked(args.Term)
-	}
-	reply.Term = rf.currentTerm
-	if rf.killed() || args.Term < rf.currentTerm {
-		return
+		reply.Term = rf.currentTerm
 	}
 	lastIndex := len(rf.log) - 1
 	lastTerm := rf.log[lastIndex].Term
 	upToDate := args.LastLogTerm > lastTerm || (args.LastLogTerm == lastTerm && args.LastLogIndex >= lastIndex)
 	if upToDate && (rf.votedFor == -1 || rf.votedFor == args.CandidateId) {
-		rf.votedFor = args.CandidateId
-		rf.persist() // 2C 接入后，在回复同意前保存投票。
+		if rf.votedFor != args.CandidateId {
+			rf.votedFor = args.CandidateId
+			rf.persist()
+		}
 		rf.resetElectionLocked()
 		reply.VoteGranted = true
 		rf.recordLocked("vote_granted", args.CandidateId, 0)
@@ -246,8 +253,10 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 // confusing debug output. any goroutine with a long-running loop
 // should call killed() to check whether it should stop.
 func (rf *Raft) Kill() {
+	// Wait for any state write in progress before the persister can be reused.
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
 	atomic.StoreInt32(&rf.dead, 1)
-	// Your code here, if desired.
 }
 
 func (rf *Raft) killed() bool {
@@ -259,10 +268,11 @@ func (rf *Raft) ticker() {
 	tick := time.NewTicker(rf.timing.PollInterval)
 	defer tick.Stop()
 	for now := range tick.C {
+		rf.mu.Lock()
 		if rf.killed() {
+			rf.mu.Unlock()
 			return
 		}
-		rf.mu.Lock()
 		if rf.role == leader {
 			if now.Sub(rf.lastHeartbeat) >= rf.timing.HeartbeatInterval {
 				rf.broadcastHeartbeatLocked()
@@ -322,9 +332,7 @@ func MakeWithConfig(peers []*labrpc.ClientEnd, me int,
 	rf.nextIndex = make([]int, len(peers))
 	rf.matchIndex = make([]int, len(peers))
 
-	// Your initialization code here (2A, 2B, 2C).
-
-	// initialize from state persisted before a crash
+	// Restore the persistent fields before any goroutine can observe them.
 	rf.readPersist(persister.ReadRaftState())
 	rf.resetElectionLocked()
 	go rf.applier()

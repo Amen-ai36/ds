@@ -52,7 +52,7 @@ func (rf *Raft) becomeFollowerLocked(term int) {
 	if term > rf.currentTerm {
 		rf.currentTerm = term
 		rf.votedFor = -1
-		rf.persist() // 成员 C 实现该函数后，此路径立即获得持久化。
+		rf.persist()
 	}
 	if rf.role != follower {
 		rf.recordLocked("step_down", -1, 0)
@@ -141,16 +141,17 @@ type AppendEntriesReply struct {
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	reply.Term = rf.currentTerm
+	reply.Success = false
+	if rf.killed() || args.Term < rf.currentTerm {
+		return
+	}
 	if len(rf.log) == 0 {
 		rf.log = []LogEntry{{Term: 0}}
 	}
-	reply.Success = false
 	if args.Term > rf.currentTerm {
 		rf.becomeFollowerLocked(args.Term)
-	}
-	reply.Term = rf.currentTerm
-	if rf.killed() || args.Term < rf.currentTerm {
-		return
+		reply.Term = rf.currentTerm
 	}
 	// 同任期合法 Leader 的心跳也使 Candidate 退回 Follower；
 	// 同任期不能清空 votedFor，否则可能在该任期重复投给其他人。
@@ -172,16 +173,11 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		reply.ConflictIndex = i
 		return
 	}
-	idx := args.PrevLogIndex + 1
 	for j, e := range args.Entries {
-		if idx+j < len(rf.log) {
-			if rf.log[idx+j].Term != e.Term {
-				rf.log = rf.log[:idx+j]
-				rf.log = append(rf.log, args.Entries[j:]...)
-				break
-			}
-		} else {
-			rf.log = append(rf.log, args.Entries[j:]...)
+		index := args.PrevLogIndex + 1 + j
+		if index == len(rf.log) || rf.log[index].Term != e.Term {
+			rf.log = append(rf.log[:index], args.Entries[j:]...)
+			rf.persist()
 			break
 		}
 	}
@@ -191,7 +187,6 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 			rf.commitIndex = len(rf.log) - 1
 		}
 	}
-	rf.persist()
 	reply.Success = true
 }
 

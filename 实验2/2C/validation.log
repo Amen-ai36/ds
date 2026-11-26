@@ -1,0 +1,253 @@
+2026-11-27 Asia/Shanghai
+go version go1.27.4 windows/amd64
+gcc (Rev4, Built by MSYS2 project) 16.2.0
+RAFT_ELECTION_PROFILE=baseline CGO_ENABLED=1
+
+$ go test -v ./raft -run '^Test(VoteSurvivesRestart|LogSurvivesRestart|Persist[123])2C$' -count=1 -timeout=120s
+=== RUN   TestVoteSurvivesRestart2C
+    persistence_test.go:23: node=1 before restart term=2 votedFor=0
+    persistence_test.go:37: node=1 after restart term=2 votedFor=0 role=follower
+    persistence_test.go:43: node=1 competing vote term=2 candidate=2 granted=false
+--- PASS: TestVoteSurvivesRestart2C (0.00s)
+=== RUN   TestLogSurvivesRestart2C
+    persistence_test.go:76: applied index=1 command="before"
+    persistence_test.go:90: node=0 new leader term=2 appended index=2
+    persistence_test.go:91: applied index=1 command="before"
+    persistence_test.go:92: applied index=2 command="after"
+--- PASS: TestLogSurvivesRestart2C (0.01s)
+=== RUN   TestPersist12C
+Test (2C): basic persistence ...
+  ... Passed --   4.6  3   70   18907    6
+--- PASS: TestPersist12C (4.56s)
+=== RUN   TestPersist22C
+Test (2C): more persistence ...
+  ... Passed --  18.1  5  777  176315   16
+--- PASS: TestPersist22C (18.07s)
+=== RUN   TestPersist32C
+Test (2C): partitioned leader and one follower crash, leader restarts ...
+  ... Passed --   2.2  3   33    8684    4
+--- PASS: TestPersist32C (2.23s)
+PASS
+ok  	6.5840/raft	25.686s
+exit code 0
+
+$ go test -v ./raft -run '2[ABC]$' -count=1 -timeout=300s
+=== RUN   TestSingleNodeElection2A
+--- PASS: TestSingleNodeElection2A (0.77s)
+=== RUN   TestVoteOncePerTerm2A
+--- PASS: TestVoteOncePerTerm2A (0.00s)
+=== RUN   TestHeartbeatTermRules2A
+--- PASS: TestHeartbeatTermRules2A (0.00s)
+=== RUN   TestRejectedVoteDoesNotResetTimer2A
+--- PASS: TestRejectedVoteDoesNotResetTimer2A (0.00s)
+=== RUN   TestVoteSurvivesRestart2C
+    persistence_test.go:23: node=1 before restart term=2 votedFor=0
+    persistence_test.go:37: node=1 after restart term=2 votedFor=0 role=follower
+    persistence_test.go:43: node=1 competing vote term=2 candidate=2 granted=false
+--- PASS: TestVoteSurvivesRestart2C (0.00s)
+=== RUN   TestLogSurvivesRestart2C
+    persistence_test.go:76: applied index=1 command="before"
+    persistence_test.go:90: node=0 new leader term=2 appended index=2
+    persistence_test.go:91: applied index=1 command="before"
+    persistence_test.go:92: applied index=2 command="after"
+--- PASS: TestLogSurvivesRestart2C (0.01s)
+=== RUN   TestInitialElection2A
+Test (2A): initial election ...
+  ... Passed --   3.0  3   42   12116    0
+--- PASS: TestInitialElection2A (3.02s)
+=== RUN   TestReElection2A
+Test (2A): election after network failure ...
+  ... Passed --   6.3  3  130   26883    0
+--- PASS: TestReElection2A (6.26s)
+=== RUN   TestManyElections2A
+Test (2A): multiple elections ...
+  ... Passed --   6.0  7  444   91960    0
+--- PASS: TestManyElections2A (6.04s)
+=== RUN   TestBasicAgree2B
+Test (2B): basic agreement ...
+  ... Passed --   0.9  3   16    4634    3
+--- PASS: TestBasicAgree2B (0.93s)
+=== RUN   TestRPCBytes2B
+Test (2B): RPC byte count ...
+  ... Passed --   2.1  3   48  114726   11
+--- PASS: TestRPCBytes2B (2.08s)
+=== RUN   TestFollowerFailure2B
+Test (2B): test progressive failure of followers ...
+  ... Passed --   5.0  3   94   21265    3
+--- PASS: TestFollowerFailure2B (5.05s)
+=== RUN   TestLeaderFailure2B
+Test (2B): test failure of leaders ...
+  ... Passed --   5.5  3  154   35149    3
+--- PASS: TestLeaderFailure2B (5.49s)
+=== RUN   TestFailAgree2B
+Test (2B): agreement after follower reconnects ...
+  ... Passed --   3.9  3   73   19995    7
+--- PASS: TestFailAgree2B (3.88s)
+=== RUN   TestFailNoAgree2B
+Test (2B): no agreement if too many followers disconnect ...
+  ... Passed --   3.8  5  166   37456    3
+--- PASS: TestFailNoAgree2B (3.80s)
+=== RUN   TestConcurrentStarts2B
+Test (2B): concurrent Start()s ...
+  ... Passed --   1.0  3   22    6557    6
+--- PASS: TestConcurrentStarts2B (0.99s)
+=== RUN   TestRejoin2B
+Test (2B): rejoin of partitioned leader ...
+  ... Passed --   6.5  3  162   41110    4
+--- PASS: TestRejoin2B (6.49s)
+=== RUN   TestBackup2B
+Test (2B): leader backs up quickly over incorrect follower logs ...
+  ... Passed --  21.2  5 2083 1593524  102
+--- PASS: TestBackup2B (21.15s)
+=== RUN   TestCount2B
+Test (2B): RPC counts aren't too high ...
+  ... Passed --   2.5  3   56   17393   12
+--- PASS: TestCount2B (2.52s)
+=== RUN   TestPersist12C
+Test (2C): basic persistence ...
+  ... Passed --   4.6  3   72   19529    6
+--- PASS: TestPersist12C (4.62s)
+=== RUN   TestPersist22C
+Test (2C): more persistence ...
+  ... Passed --  19.5  5  829  193859   16
+--- PASS: TestPersist22C (19.53s)
+=== RUN   TestPersist32C
+Test (2C): partitioned leader and one follower crash, leader restarts ...
+  ... Passed --   2.1  3   33    8626    4
+--- PASS: TestPersist32C (2.09s)
+=== RUN   TestFigure82C
+Test (2C): Figure 8 ...
+  ... Passed --  30.8  5  732  168918   43
+--- PASS: TestFigure82C (30.82s)
+=== RUN   TestUnreliableAgree2C
+Test (2C): unreliable agreement ...
+  ... Passed --   1.7  5  996  348544  246
+--- PASS: TestUnreliableAgree2C (1.71s)
+=== RUN   TestFigure8Unreliable2C
+Test (2C): Figure 8 (unreliable) ...
+  ... Passed --  30.8  5 7462 14491601  139
+--- PASS: TestFigure8Unreliable2C (30.83s)
+=== RUN   TestReliableChurn2C
+Test (2C): churn ...
+  ... Passed --  16.3  5 9732 53506445 1484
+--- PASS: TestReliableChurn2C (16.35s)
+=== RUN   TestUnreliableChurn2C
+Test (2C): unreliable churn ...
+  ... Passed --  16.4  5 4357 2239338 1028
+--- PASS: TestUnreliableChurn2C (16.36s)
+PASS
+ok  	6.5840/raft	191.618s
+exit code 0
+
+$ go test -race -v ./raft -run '2[ABC]$' -count=1 -timeout=360s
+=== RUN   TestSingleNodeElection2A
+--- PASS: TestSingleNodeElection2A (0.76s)
+=== RUN   TestVoteOncePerTerm2A
+--- PASS: TestVoteOncePerTerm2A (0.00s)
+=== RUN   TestHeartbeatTermRules2A
+--- PASS: TestHeartbeatTermRules2A (0.00s)
+=== RUN   TestRejectedVoteDoesNotResetTimer2A
+--- PASS: TestRejectedVoteDoesNotResetTimer2A (0.00s)
+=== RUN   TestVoteSurvivesRestart2C
+    persistence_test.go:23: node=1 before restart term=2 votedFor=0
+    persistence_test.go:37: node=1 after restart term=2 votedFor=0 role=follower
+    persistence_test.go:43: node=1 competing vote term=2 candidate=2 granted=false
+--- PASS: TestVoteSurvivesRestart2C (0.00s)
+=== RUN   TestLogSurvivesRestart2C
+    persistence_test.go:76: applied index=1 command="before"
+    persistence_test.go:90: node=0 new leader term=2 appended index=2
+    persistence_test.go:91: applied index=1 command="before"
+    persistence_test.go:92: applied index=2 command="after"
+--- PASS: TestLogSurvivesRestart2C (0.01s)
+=== RUN   TestInitialElection2A
+Test (2A): initial election ...
+  ... Passed --   3.5  3   48   13886    0
+--- PASS: TestInitialElection2A (3.51s)
+=== RUN   TestReElection2A
+Test (2A): election after network failure ...
+  ... Passed --   4.6  3   94   19376    0
+--- PASS: TestReElection2A (4.65s)
+=== RUN   TestManyElections2A
+Test (2A): multiple elections ...
+  ... Passed --   7.0  7  576  116493    0
+--- PASS: TestManyElections2A (7.02s)
+=== RUN   TestBasicAgree2B
+Test (2B): basic agreement ...
+  ... Passed --   1.0  3   16    4600    3
+--- PASS: TestBasicAgree2B (0.98s)
+=== RUN   TestRPCBytes2B
+Test (2B): RPC byte count ...
+  ... Passed --   2.2  3   50  115038   11
+--- PASS: TestRPCBytes2B (2.17s)
+=== RUN   TestFollowerFailure2B
+Test (2B): test progressive failure of followers ...
+  ... Passed --   5.0  3   96   21406    3
+--- PASS: TestFollowerFailure2B (5.03s)
+=== RUN   TestLeaderFailure2B
+Test (2B): test failure of leaders ...
+  ... Passed --   5.4  3  150   34202    3
+--- PASS: TestLeaderFailure2B (5.40s)
+=== RUN   TestFailAgree2B
+Test (2B): agreement after follower reconnects ...
+  ... Passed --   6.0  3  107   30327    8
+--- PASS: TestFailAgree2B (5.96s)
+=== RUN   TestFailNoAgree2B
+Test (2B): no agreement if too many followers disconnect ...
+  ... Passed --   3.8  5  160   36260    3
+--- PASS: TestFailNoAgree2B (3.84s)
+=== RUN   TestConcurrentStarts2B
+Test (2B): concurrent Start()s ...
+  ... Passed --   1.1  3   22    6954    6
+--- PASS: TestConcurrentStarts2B (1.08s)
+=== RUN   TestRejoin2B
+Test (2B): rejoin of partitioned leader ...
+  ... Passed --   4.5  3  121   29477    4
+--- PASS: TestRejoin2B (4.52s)
+=== RUN   TestBackup2B
+Test (2B): leader backs up quickly over incorrect follower logs ...
+  ... Passed --  21.8  5 2120 1601964  102
+--- PASS: TestBackup2B (21.80s)
+=== RUN   TestCount2B
+Test (2B): RPC counts aren't too high ...
+  ... Passed --   2.7  3   58   18699   12
+--- PASS: TestCount2B (2.69s)
+=== RUN   TestPersist12C
+Test (2C): basic persistence ...
+  ... Passed --   4.8  3   74   19751    6
+--- PASS: TestPersist12C (4.83s)
+=== RUN   TestPersist22C
+Test (2C): more persistence ...
+  ... Passed --  19.3  5  828  193468   16
+--- PASS: TestPersist22C (19.33s)
+=== RUN   TestPersist32C
+Test (2C): partitioned leader and one follower crash, leader restarts ...
+  ... Passed --   2.3  3   35    9288    4
+--- PASS: TestPersist32C (2.33s)
+=== RUN   TestFigure82C
+Test (2C): Figure 8 ...
+  ... Passed --  28.0  5  641  146401   38
+--- PASS: TestFigure82C (27.97s)
+=== RUN   TestUnreliableAgree2C
+Test (2C): unreliable agreement ...
+  ... Passed --   1.7  5 1000  347514  246
+--- PASS: TestUnreliableAgree2C (1.71s)
+=== RUN   TestFigure8Unreliable2C
+Test (2C): Figure 8 (unreliable) ...
+  ... Passed --  36.3  5 7265 9691568   71
+--- PASS: TestFigure8Unreliable2C (36.28s)
+=== RUN   TestReliableChurn2C
+Test (2C): churn ...
+  ... Passed --  16.2  5 4975 7040743 1172
+--- PASS: TestReliableChurn2C (16.22s)
+=== RUN   TestUnreliableChurn2C
+Test (2C): unreliable churn ...
+  ... Passed --  16.2  5 3861 2018239  941
+--- PASS: TestUnreliableChurn2C (16.23s)
+PASS
+ok  	6.5840/raft	196.394s
+exit code 0
+
+$ go test ./labgob ./labrpc -count=1 -timeout=120s
+ok  	6.5840/labgob	1.050s
+ok  	6.5840/labrpc	3.423s
+exit code 0
