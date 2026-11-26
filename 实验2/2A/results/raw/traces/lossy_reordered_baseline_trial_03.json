@@ -1,0 +1,138 @@
+{
+  "scenario": "lossy_reordered",
+  "profile": "baseline",
+  "trial": 3,
+  "start_unix_nano": 1795700885116043500,
+  "fault_unix_nano": 1795700888378343100,
+  "old_leader": 3,
+  "events": [
+    {
+      "at_unix_nano": 1795700885587910500,
+      "node": 3,
+      "term": 1,
+      "kind": "election_started",
+      "peer": 3,
+      "votes": 1
+    },
+    {
+      "at_unix_nano": 1795700885589971800,
+      "node": 4,
+      "term": 1,
+      "kind": "vote_granted",
+      "peer": 3,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700885589971800,
+      "node": 0,
+      "term": 1,
+      "kind": "vote_granted",
+      "peer": 3,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700885590591200,
+      "node": 2,
+      "term": 1,
+      "kind": "vote_granted",
+      "peer": 3,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700885608704700,
+      "node": 1,
+      "term": 1,
+      "kind": "vote_granted",
+      "peer": 3,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700885828364500,
+      "node": 3,
+      "term": 1,
+      "kind": "vote_received",
+      "peer": 4,
+      "votes": 2
+    },
+    {
+      "at_unix_nano": 1795700885886156100,
+      "node": 3,
+      "term": 1,
+      "kind": "vote_received",
+      "peer": 0,
+      "votes": 3
+    },
+    {
+      "at_unix_nano": 1795700885886156100,
+      "node": 3,
+      "term": 1,
+      "kind": "leader_elected",
+      "peer": 3,
+      "votes": 3
+    },
+    {
+      "at_unix_nano": 1795700888828615300,
+      "node": 4,
+      "term": 2,
+      "kind": "election_started",
+      "peer": 4,
+      "votes": 1
+    },
+    {
+      "at_unix_nano": 1795700888837799400,
+      "node": 0,
+      "term": 2,
+      "kind": "vote_granted",
+      "peer": 4,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700888838787700,
+      "node": 4,
+      "term": 2,
+      "kind": "vote_received",
+      "peer": 0,
+      "votes": 2
+    },
+    {
+      "at_unix_nano": 1795700888855051900,
+      "node": 1,
+      "term": 2,
+      "kind": "vote_granted",
+      "peer": 4,
+      "votes": 0
+    },
+    {
+      "at_unix_nano": 1795700888999049000,
+      "node": 2,
+      "term": 2,
+      "kind": "election_started",
+      "peer": 2,
+      "votes": 1
+    },
+    {
+      "at_unix_nano": 1795700889223346700,
+      "node": 4,
+      "term": 2,
+      "kind": "vote_received",
+      "peer": 1,
+      "votes": 3
+    },
+    {
+      "at_unix_nano": 1795700889223346700,
+      "node": 4,
+      "term": 2,
+      "kind": "leader_elected",
+      "peer": 4,
+      "votes": 3
+    },
+    {
+      "at_unix_nano": 1795700889248158600,
+      "node": 2,
+      "term": 2,
+      "kind": "step_down",
+      "peer": 4,
+      "votes": 0
+    }
+  ]
+}

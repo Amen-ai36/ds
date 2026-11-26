@@ -1,0 +1,25 @@
+# 可选在线验证配置：需要时放到仓库根目录 .github/workflows/raft-2a.yml。
+# 本交付默认保留在 2A 内，避免擅自修改仓库其他成员的文件。
+name: Raft 2A validation and experiments
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  member-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.4'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python '实验2/2A/scripts/run_experiments.py' --race --trials 10
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: raft-2a-results
+          path: 实验2/2A/results/

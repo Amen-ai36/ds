@@ -1,0 +1,121 @@
+{
+  "started_at_utc": "2026-11-26T13:45:25Z",
+  "go_version": "go version go1.27.4 windows/amd64",
+  "platform": "Windows-10-10.0.26300-SP0",
+  "machine": "AMD64",
+  "cpu_count": 28,
+  "race": true,
+  "trials_per_group": 10,
+  "network": "course labrpc: reliable; unreliable + LongReordering",
+  "nodes": 5,
+  "quiet_seconds_per_trial": 2,
+  "seed_base": 20261126,
+  "commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-v",
+        "-run",
+        "^TestMemberAExperiment$",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "environment": {
+        "RAFT_EXPERIMENTS": "1",
+        "RAFT_TRIALS": "10",
+        "RAFT_RESULTS_DIR": "<2A>/results/raw"
+      },
+      "exit_code": 0,
+      "duration_s": 277.812,
+      "log": "election_experiments.log"
+    }
+  ],
+  "source_sha256": {
+    "labgob\\labgob.go": "5ae7396b42d611003d2eae33774bc1d09e7ba8a4239d9fa0bc3757cfebb3ac00",
+    "labgob\\test_test.go": "69ecc5953292436083322784fea363675e46bfddd5aea804bb54917d92c96382",
+    "labrpc\\labrpc.go": "2815efe3d9ecc24d951bff72e8ea7f5ef48ffd067c94623b62b2c881ec99ec24",
+    "labrpc\\test_test.go": "ada12a55545efdeb60f5ba75486185a26149be634aaa57262c3bbd2b87891f5f",
+    "raft\\config.go": "cda619281f1dd11389366a93f0d893192341ce4da09be25342443adba0f993d4",
+    "raft\\election.go": "59a25307c8e17f1733014494d9669952c8e9579b344286ac9826b32e75e8d145",
+    "raft\\election_config.go": "53ad5366f274382ae541a87105a58aac9dd0edc5f84448a242ba246488c7e79d",
+    "raft\\election_experiment_test.go": "616b65458146198ff06fb3d968a352305237368fd0730a801fad5d97ed9d313f",
+    "raft\\election_rules_test.go": "0b6e160673f676eae3b6cae9def89a141d2c205530e93bd90bf10dcdc2321de4",
+    "raft\\persister.go": "e168017d676f31fba27d6a996ad9b7938dcef0828fb98db391340bef8d14800c",
+    "raft\\raft.go": "6f55d769dc6a9dbe6858c98533e3e5e1107af6a1c87415734d444b8357f8a62a",
+    "raft\\test_test.go": "e65f75c749adf012200bba7e26ffbb08c3eb49e32a7eb477e75df716660a57cd",
+    "raft\\util.go": "105d627a5d2b0e68911cac7918b7f885bc186890a2dd0ab6c8ddc76f0f17fba6"
+  },
+  "prior_validation_commands": [
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-v",
+        "-run",
+        "2A$",
+        "-count=3",
+        "-timeout=240s"
+      ],
+      "environment": {
+        "RAFT_ELECTION_PROFILE": "baseline"
+      },
+      "exit_code": 0,
+      "duration_s": 102.781,
+      "log": "validation_baseline.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-v",
+        "-run",
+        "2A$",
+        "-count=1",
+        "-timeout=240s"
+      ],
+      "environment": {
+        "RAFT_ELECTION_PROFILE": "fast"
+      },
+      "exit_code": 0,
+      "duration_s": 23.266,
+      "log": "validation_fast.log"
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "-race",
+        "-v",
+        "-run",
+        "2A$",
+        "-count=1",
+        "-timeout=240s"
+      ],
+      "environment": {
+        "RAFT_ELECTION_PROFILE": "stable"
+      },
+      "exit_code": 0,
+      "duration_s": 26.109,
+      "log": "validation_stable.log"
+    }
+  ],
+  "fixed_baseline_validation": {
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-v",
+      "-run",
+      "2A$",
+      "-count=1",
+      "-timeout=120s"
+    ],
+    "exit_code": 0,
+    "duration_s": 26.203,
+    "log": "validation_fixed_snapshot.log"
+  }
+}

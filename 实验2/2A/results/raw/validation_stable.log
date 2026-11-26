@@ -1,0 +1,22 @@
+=== RUN   TestSingleNodeElection2A
+--- PASS: TestSingleNodeElection2A (0.76s)
+=== RUN   TestVoteOncePerTerm2A
+--- PASS: TestVoteOncePerTerm2A (0.00s)
+=== RUN   TestHeartbeatTermRules2A
+--- PASS: TestHeartbeatTermRules2A (0.00s)
+=== RUN   TestRejectedVoteDoesNotResetTimer2A
+--- PASS: TestRejectedVoteDoesNotResetTimer2A (0.00s)
+=== RUN   TestInitialElection2A
+Test (2A): initial election ...
+  ... Passed --   4.0  3   40    4964    0
+--- PASS: TestInitialElection2A (4.01s)
+=== RUN   TestReElection2A
+Test (2A): election after network failure ...
+  ... Passed --   6.0  3   96    7792    0
+--- PASS: TestReElection2A (6.03s)
+=== RUN   TestManyElections2A
+Test (2A): multiple elections ...
+  ... Passed --   6.1  7  342   30500    0
+--- PASS: TestManyElections2A (6.15s)
+PASS
+ok  	6.5840/raft	20.644s
