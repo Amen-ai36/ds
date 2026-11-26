@@ -62,6 +62,12 @@ func (rf *Raft) becomeFollowerLocked(term int) {
 
 func (rf *Raft) becomeLeaderLocked(votes int) {
 	rf.role = leader
+	last := len(rf.log)
+	for p := range rf.peers {
+		rf.nextIndex[p] = last
+		rf.matchIndex[p] = 0
+	}
+	rf.matchIndex[rf.me] = last - 1
 	rf.recordLocked("leader_elected", rf.me, votes)
 	// 当选立即发送第一轮心跳，后续按心跳周期发送。
 	rf.broadcastHeartbeatLocked()
@@ -73,7 +79,8 @@ func (rf *Raft) startElectionLocked() {
 	rf.votedFor = rf.me
 	rf.persist()             // 在发送 RequestVote 之前保存新任期和自投。
 	rf.resetElectionLocked() // 每轮重新随机化，分票后不会一直同步重试。
-	args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me}
+	lastIndex, lastTerm := rf.lastLogLocked()
+	args := RequestVoteArgs{Term: rf.currentTerm, CandidateId: rf.me, LastLogIndex: lastIndex, LastLogTerm: lastTerm}
 	votes := 1
 	rf.recordLocked("election_started", rf.me, votes)
 	if votes > len(rf.peers)/2 { // 单节点集群也能靠自投当选。
@@ -114,20 +121,29 @@ func (rf *Raft) startElectionLocked() {
 	}
 }
 
-// 2A 仅使用空 AppendEntries 心跳。日志字段和一致性检查由成员 B 补充。
+// AppendEntries 同时承载心跳和日志复制请求。
 type AppendEntriesArgs struct {
-	Term     int
-	LeaderId int
+	Term         int
+	LeaderId     int
+	PrevLogIndex int
+	PrevLogTerm  int
+	Entries      []LogEntry
+	LeaderCommit int
 }
 
 type AppendEntriesReply struct {
-	Term    int
-	Success bool
+	Term          int
+	Success       bool
+	ConflictTerm  int
+	ConflictIndex int
 }
 
 func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply) {
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
+	if len(rf.log) == 0 {
+		rf.log = []LogEntry{{Term: 0}}
+	}
 	reply.Success = false
 	if args.Term > rf.currentTerm {
 		rf.becomeFollowerLocked(args.Term)
@@ -143,26 +159,106 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	}
 	rf.role = follower
 	rf.resetElectionLocked()
+	if args.PrevLogIndex >= len(rf.log) {
+		reply.ConflictIndex = len(rf.log)
+		return
+	}
+	if rf.log[args.PrevLogIndex].Term != args.PrevLogTerm {
+		reply.ConflictTerm = rf.log[args.PrevLogIndex].Term
+		i := args.PrevLogIndex
+		for i > 0 && rf.log[i-1].Term == reply.ConflictTerm {
+			i--
+		}
+		reply.ConflictIndex = i
+		return
+	}
+	idx := args.PrevLogIndex + 1
+	for j, e := range args.Entries {
+		if idx+j < len(rf.log) {
+			if rf.log[idx+j].Term != e.Term {
+				rf.log = rf.log[:idx+j]
+				rf.log = append(rf.log, args.Entries[j:]...)
+				break
+			}
+		} else {
+			rf.log = append(rf.log, args.Entries[j:]...)
+			break
+		}
+	}
+	if args.LeaderCommit > rf.commitIndex {
+		rf.commitIndex = args.LeaderCommit
+		if rf.commitIndex > len(rf.log)-1 {
+			rf.commitIndex = len(rf.log) - 1
+		}
+	}
+	rf.persist()
 	reply.Success = true
 }
 
 func (rf *Raft) broadcastHeartbeatLocked() {
 	rf.lastHeartbeat = time.Now()
-	args := AppendEntriesArgs{Term: rf.currentTerm, LeaderId: rf.me}
-	for peer := range rf.peers {
-		if peer == rf.me {
-			continue
+	for p := range rf.peers {
+		if p != rf.me {
+			go rf.replicate(p)
 		}
-		go func(server int) {
-			var reply AppendEntriesReply
-			if !rf.peers[server].Call("Raft.AppendEntries", &args, &reply) {
-				return
+	}
+}
+
+func (rf *Raft) replicate(peer int) {
+	rf.mu.Lock()
+	if rf.role != leader || rf.killed() {
+		rf.mu.Unlock()
+		return
+	}
+	next := rf.nextIndex[peer]
+	if next < 1 {
+		next = 1
+	}
+	prev := next - 1
+	entries := append([]LogEntry(nil), rf.log[next:]...)
+	args := AppendEntriesArgs{Term: rf.currentTerm, LeaderId: rf.me, PrevLogIndex: prev, PrevLogTerm: rf.log[prev].Term, Entries: entries, LeaderCommit: rf.commitIndex}
+	term := rf.currentTerm
+	rf.mu.Unlock()
+	var reply AppendEntriesReply
+	if !rf.peers[peer].Call("Raft.AppendEntries", &args, &reply) {
+		return
+	}
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	if rf.killed() {
+		return
+	}
+	if reply.Term > rf.currentTerm {
+		rf.becomeFollowerLocked(reply.Term)
+		return
+	}
+	if rf.role != leader || rf.currentTerm != term {
+		return
+	}
+	if reply.Success {
+		match := args.PrevLogIndex + len(args.Entries)
+		if match > rf.matchIndex[peer] {
+			rf.matchIndex[peer] = match
+		}
+		rf.nextIndex[peer] = rf.matchIndex[peer] + 1
+		rf.advanceCommitLocked()
+	} else {
+		newNext := reply.ConflictIndex
+		if reply.ConflictTerm != 0 {
+			for i := len(rf.log) - 1; i >= 0; i-- {
+				if rf.log[i].Term == reply.ConflictTerm {
+					newNext = i + 1
+					break
+				}
 			}
-			rf.mu.Lock()
-			defer rf.mu.Unlock()
-			if !rf.killed() && reply.Term > rf.currentTerm {
-				rf.becomeFollowerLocked(reply.Term)
-			}
-		}(peer)
+		}
+		if newNext < 1 {
+			newNext = 1
+		}
+		if newNext >= rf.nextIndex[peer] {
+			newNext = rf.nextIndex[peer] - 1
+		}
+		rf.nextIndex[peer] = newNext
+		go rf.replicate(peer)
 	}
 }
