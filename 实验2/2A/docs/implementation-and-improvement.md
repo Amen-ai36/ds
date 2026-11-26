@@ -4,17 +4,17 @@
 
 节点以 Follower、任期 0、`votedFor=-1` 启动。`ticker()` 定期检查独立的选举截止时间。Follower 或 Candidate 超时后增加任期、自投、重新随机设置本轮截止时间，再并行发送 RequestVote；获得整个集群过半节点的票数才转为 Leader。单节点集群通过自投直接当选。
 
-Leader 当选时立即广播空 AppendEntries，之后按配置周期发送心跳。Follower 收到任期不低于自己的心跳时重置超时；Candidate 收到同任期 Leader 的心跳也退回 Follower。收到更高任期请求或回复时更新任期并退位，旧任期投票随之清空；同任期心跳不会清空投票。
+在成员 A 的 2A 阶段，Leader 当选时立即广播空 AppendEntries，之后按配置周期发送心跳；成员 B 接入 2B 后复用该 RPC 携带日志条目。Follower 收到任期不低于自己的心跳时重置超时；Candidate 收到同任期 Leader 的心跳也退回 Follower。收到更高任期请求或回复时更新任期并退位，旧任期投票随之清空；同任期心跳不会清空投票。
 
 `rf.mu` 保护任期、角色、投票、定时器、随机数发生器与事件列表。RPC 等待在锁外完成。投票回复首先处理更高任期，再检查请求是否仍属于当前竞选，以免把延迟返回的旧选票加到新任期。拒绝投票不重置选举截止时间，防止不合格候选人的请求持续延迟正常选举。
 
-2A 没有实现日志新旧检查，因为它属于分工文档中的 B 成员 2B 接入项。开始竞选、改变任期与授予投票处保留持久化调用点，具体保存和恢复由 C 实现。
+成员 A 的 2A 基线阶段没有实现日志新旧检查，该部分由成员 B 在 2B 接入。当前 `code/` 已包含 B 的日志新旧检查和日志复制；开始竞选、改变任期与授予投票处仍保留持久化调用点，具体保存和恢复由 C 实现。
 
 ## 固定基线与可切换改进
 
 `baseline/` 保存固定基线的三个选举源码文件。它只提供 120 ms 心跳和 [450,750) ms 随机超时，不读取策略环境变量。`scripts/build_baseline.py` 会将可运行模块复制到独立的 `.baseline-run`，再覆盖这三个基线文件，不覆盖当前实现。
 
-当前 `code/` 版本增加可配置的心跳、超时窗口和检查周期，并提供 baseline、fast、stable 三种策略。主要差异在 `election_config.go`；投票、任期与多数派规则保持一致。`improvements.patch` 记录基线到改进版的变更，其应用目录为 `code/6.5840/src/raft`。本地 Git 分支 `2a-baseline` 保留固定参数版本，`2a-election-tuning` 保存参数策略与对照实验，`second` 汇合成员 A 的最终交付。
+当前 `code/` 版本增加可配置的心跳、超时窗口和检查周期，并提供 baseline、fast、stable 三种策略。主要差异在 `election_config.go`；投票、任期与多数派规则保持一致。`improvements.patch` 记录基线到改进版的变更，其应用目录为 `code/6.5840/src/raft`。本地 Git 分支 `2a-baseline` 保留固定参数版本，`2a-election-tuning` 保存参数策略与对照实验，`second` 先汇合成员 A 的交付，随后接入成员 B 的 2B 实现。
 
 ```sh
 python scripts/build_baseline.py

@@ -6,7 +6,7 @@
 
 | 需要的内容 | 位置 |
 | --- | --- |
-| 可运行的 2A 模块 | `code/6.5840/src/` |
+| 可运行的 2A/2B 模块 | `code/6.5840/src/` |
 | 选举主要实现 | `code/6.5840/src/raft/raft.go`、`election.go` |
 | 可切换参数策略 | `code/6.5840/src/raft/election_config.go` |
 | 固定参数基线源码 | `baseline/`；[改进说明](docs/implementation-and-improvement.md) |
@@ -54,8 +54,8 @@ python scripts/run_experiments.py --go /path/to/go --trials 10
 
 ## 与成员 B、C 接入
 
-`Make()`、`GetState()`、`Start()`、`ApplyMsg`、`Kill()` 和 `Snapshot()` 的课程接口均保留。新增 `MakeWithConfig()` 只用于显式传入计时策略。2B 的日志复制、日志新旧检查、提交应用和 2C 的编码恢复仍由对应成员完成；本版本的 `Start()`、`persist()`、`readPersist()`、`Snapshot()` 保留骨架占位，不应把它当作完整复制状态机使用。
+`Make()`、`GetState()`、`Start()`、`ApplyMsg`、`Kill()` 和 `Snapshot()` 的课程接口均保留。当前 `code/` 已包含成员 A 的 2A 选举和成员 B 的 2B 日志复制：`Start()`、日志新旧检查、完整 AppendEntries、提交和 `ApplyMsg` 均已实现。2C 的 `persist()`、`readPersist()` 和 2D 的 `Snapshot()` 仍由后续成员接续。
 
-2A 已在任期更新、开始竞选与授予投票处调用 `persist()` 占位函数，方便 C 接入。C 使用当前字段 `currentTerm`、`votedFor`，补充日志字段及编解码，避免重复声明同名字段；B 在 `RequestVote` 添加日志新旧约束，并将心跳 RPC 扩展为完整 AppendEntries。
+2A 阶段在任期更新、开始竞选与授予投票处保留 `persist()` 调用点；B 在现有字段基础上补充日志结构、日志新旧约束和复制状态，不重复声明 `currentTerm`、`votedFor`。C 接入持久化时应沿用这些字段和调用点。
 
-测试结果不代表 2B、2C 已通过。初选与重选图来自选举事件；Paxos 为文献对比，没有虚构的 Paxos 实测数据。
+本地验证中 2A/2B 普通测试和 race 测试均通过；完整 raft 测试在 2C 持久化阶段失败，原因是 `persist()`/`readPersist()` 尚未实现。初选与重选图来自 A 的选举事件；Paxos 为文献对比，没有虚构的 Paxos 实测数据。

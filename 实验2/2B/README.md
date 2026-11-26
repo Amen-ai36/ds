@@ -13,8 +13,10 @@
 需要 Go 1.20 或更新版本。在 `../2A/code/6.5840/src` 执行：
 
 ```sh
-go test ./raft -run '2A|2B' -count=1
-go test -race ./raft -count=1
+export PATH=/Users/veritas/.local/opt/go1.27.4/bin:$PATH
+cd ../2A/code/6.5840/src
+go test ./raft -run '2A|2B' -count=1 -timeout=240s
+go test -race ./raft -run '2A|2B' -count=1 -timeout=360s
 ```
 
-本次编辑环境未安装 Go，因此以上测试尚未执行；不要把 A 的 2A 实验记录当作本次 2B 测试结果。
+Go 1.27.4 已安装并完成上述测试。普通测试和 race 测试均通过；完整 `go test ./raft` 在 2C 持久化阶段失败，因为 `persist()`/`readPersist()` 由成员 C 接续实现。
